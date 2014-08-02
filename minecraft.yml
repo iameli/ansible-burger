@@ -1,0 +1,100 @@
+#
+# Minecraft Server Ansible Playbook
+#
+# Author:: Pol Llovet (<pol.llovet@montana.edu>)
+# Copyright 2013, Montana State University
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+---
+- hosts: all
+  sudo: yes
+  handlers:
+    - name: restart minecraft
+      service: name=minecraft state=restarted
+  tasks:
+    - name: install java
+      apt: name=default-jre state=present
+      tags:
+        - install_minecraft
+
+    - name: create minecraft user
+      user: name=minecraft
+            group=nogroup
+            comment="Minecraft System User"
+            home="/home/minecraft"
+            shell="/bin/bash"
+            password="asdfasdf"
+      tags:
+        - install_minecraft
+
+    - name: upload minecraft config files
+      template: src=minecraft/{{item}}
+            dest=~minecraft/{{item}}
+            owner=minecraft
+            group=nogroup
+            mode=0644
+      with_items:
+        - eula.txt
+        - config
+        - server.properties
+      notify: restart minecraft
+      tags:
+        - install_minecraft
+
+    - name: upload minecraft init script
+      template: src=minecraft/minecraft.init
+            dest=~minecraft/minecraft.init
+            owner=minecraft
+            group=nogroup
+            mode=0755
+      notify: restart minecraft
+      tags:
+        - install_minecraft
+
+    - name: install minecraft init script
+      file: src=~minecraft/minecraft.init
+          dest=/etc/init.d/minecraft
+          state=link
+      tags:
+        - install_minecraft
+
+    - name: create worlds directory
+      file: path=~minecraft/worlds
+          state=directory
+          owner=minecraft
+          group=nogroup
+
+    - name: download minecraft jar file
+      get_url: url=https://s3.amazonaws.com/Minecraft.Download/versions/14w31a/minecraft_server.14w31a.jar
+               dest=~minecraft/minecraft_server.jar
+               owner=minecraft
+               group=nogroup
+               mode=0755
+      notify: restart minecraft
+      tags:
+        - install_minecraft
+
+    - name: add minecraft init script to startup
+      service: name=minecraft enabled=yes
+      tags:
+        - install_minecraft
+
+    - name: create a cron entry for backup
+      cron: name='Minecraft Periodic Backup'
+            job='/etc/init.d/minecraft backup'
+            user=minecraft
+            minute='0,30'
+      tags:
+        - install_minecraft
+
