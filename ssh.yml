@@ -15,6 +15,15 @@
     action: lineinfile dest=/etc/ssh/sshd_config regexp="^PasswordAuthentication" line="PasswordAuthentication no" state=present
     notify: Restart ssh
 
+  - name: create locale en_US.UTF-8
+    command: /usr/sbin/locale-gen en_US.UTF-8
+
+  - name: set up en_US.UTF-8 locale
+    command: /usr/sbin/update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+  - name: install mosh
+    apt: name=mosh state=present
+
   handlers:
   - name: Restart ssh
     action: service name=ssh state=restarted
