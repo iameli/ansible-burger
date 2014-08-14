@@ -47,8 +47,20 @@
       with_items:
         - eula.txt
         - config
-        - server.properties
+        - server.properties.cfg
+      register: cfg_files
       notify: restart minecraft
+      tags:
+        - install_minecraft
+
+    - name: upload modified server.properties
+      template: src=minecraft/server.properties.cfg
+            dest=~minecraft/server.properties
+            owner=minecraft
+            group=nogroup
+            mode=0644
+      notify: restart minecraft
+      when: cfg_files.changed
       tags:
         - install_minecraft
 
@@ -76,7 +88,7 @@
           group=nogroup
 
     - name: download minecraft jar file
-      get_url: url=https://s3.amazonaws.com/Minecraft.Download/versions/14w32b/minecraft_server.14w32b.jar
+      get_url: url=https://s3.amazonaws.com/Minecraft.Download/versions/14w33a/minecraft_server.14w33a.jar
                force=yes
                dest=~minecraft/minecraft_server.jar
                owner=minecraft
