@@ -1,0 +1,20 @@
+---
+- name: check for dokku installation
+  stat: path=/usr/local/bin/dokku
+  register: dokku_exec
+
+- name: install dokku
+  shell: "wget -qO - https://raw.github.com/progrium/dokku/v0.2.0/bootstrap.sh | sudo DOKKU_TAG=v0.2.0 bash"
+  async: 1200
+  when: not dokku_exec.stat.exists
+
+- name: add dokku vhost
+  shell: echo {{domain}} > /home/dokku/VHOST
+  sudo: true
+
+- name: add VHOST file
+  template: src=VHOST.j2
+            dest=~dokku/VHOST
+            owner=dokku
+            group=nogroup
+            mode=0644

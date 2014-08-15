@@ -6,3 +6,4 @@
      - { role: ssh }
      - { role: ps1 }
      - { role: minecraft }
+     - { role: dokku }
