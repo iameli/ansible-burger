@@ -17,97 +17,90 @@
 # limitations under the License.
 #
 ---
-- hosts: all
-  sudo: yes
-  handlers:
-    - name: restart minecraft
-      service: name=minecraft state=restarted
-  tasks:
-    - name: install java
-      apt: name=default-jre state=present
-      tags:
-        - install_minecraft
+  - name: install java
+    apt: name=default-jre state=present
+    tags:
+      - install_minecraft
 
-    - name: create minecraft user
-      user: name=minecraft
-            group=nogroup
-            comment="Minecraft System User"
-            home="/home/minecraft"
-            shell="/bin/bash"
-            password="asdfasdf"
-      tags:
-        - install_minecraft
+  - name: create minecraft user
+    user: name=minecraft
+          group=nogroup
+          comment="Minecraft System User"
+          home="/home/minecraft"
+          shell="/bin/bash"
+    tags:
+      - install_minecraft
 
-    - name: upload minecraft config files
-      template: src=minecraft/{{item}}
-            dest=~minecraft/{{item}}
-            owner=minecraft
-            group=nogroup
-            mode=0644
-      with_items:
-        - eula.txt
-        - config
-        - server.properties.cfg
-      register: cfg_files
-      notify: restart minecraft
-      tags:
-        - install_minecraft
-
-    - name: upload modified server.properties
-      template: src=minecraft/server.properties.cfg
-            dest=~minecraft/server.properties
-            owner=minecraft
-            group=nogroup
-            mode=0644
-      notify: restart minecraft
-      when: cfg_files.changed
-      tags:
-        - install_minecraft
-
-    - name: upload minecraft init script
-      template: src=minecraft/minecraft.init
-            dest=~minecraft/minecraft.init
-            owner=minecraft
-            group=nogroup
-            mode=0755
-      notify: restart minecraft
-      tags:
-        - install_minecraft
-
-    - name: install minecraft init script
-      file: src=~minecraft/minecraft.init
-          dest=/etc/init.d/minecraft
-          state=link
-      tags:
-        - install_minecraft
-
-    - name: create worlds directory
-      file: path=~minecraft/worlds
-          state=directory
+  - name: upload minecraft config files
+    template: src={{item}}
+          dest=~minecraft/{{item}}
           owner=minecraft
           group=nogroup
+          mode=0644
+    with_items:
+      - eula.txt
+      - config
+      - server.properties.j2
+    register: minecraft_cfg_files
+    notify: restart minecraft
+    tags:
+      - install_minecraft
 
-    - name: download minecraft jar file
-      get_url: url=https://s3.amazonaws.com/Minecraft.Download/versions/14w33a/minecraft_server.14w33a.jar
-               force=yes
-               dest=~minecraft/minecraft_server.jar
-               owner=minecraft
-               group=nogroup
-               mode=0755
-      notify: restart minecraft
-      tags:
-        - install_minecraft
+  - name: upload modified server.properties
+    template: src=server.properties.j2
+          dest=~minecraft/server.properties
+          owner=minecraft
+          group=nogroup
+          mode=0644
+    notify: restart minecraft
+    when: minecraft_cfg_files.changed
+    tags:
+      - install_minecraft
 
-    - name: add minecraft init script to startup
-      service: name=minecraft enabled=yes
-      tags:
-        - install_minecraft
+  - name: upload minecraft init script
+    template: src=minecraft.init
+          dest=~minecraft/minecraft.init
+          owner=minecraft
+          group=nogroup
+          mode=0755
+    notify: restart minecraft
+    tags:
+      - install_minecraft
 
-    - name: create a cron entry for backup
-      cron: name='Minecraft Periodic Backup'
-            job='/etc/init.d/minecraft backup'
-            user=minecraft
-            minute='0,30'
-      tags:
-        - install_minecraft
+  - name: install minecraft init script
+    file: src=~minecraft/minecraft.init
+        dest=/etc/init.d/minecraft
+        state=link
+    tags:
+      - install_minecraft
+
+  - name: create worlds directory
+    file: path=~minecraft/worlds
+        state=directory
+        owner=minecraft
+        group=nogroup
+
+  - name: download minecraft jar file
+    get_url: url=https://s3.amazonaws.com/Minecraft.Download/versions/14w33a/minecraft_server.14w33a.jar
+             force=yes
+             dest=~minecraft/minecraft_server.jar
+             owner=minecraft
+             group=nogroup
+             mode=0755
+    notify: restart minecraft
+    tags:
+      - install_minecraft
+
+  - name: add minecraft init script to startup
+    service: name=minecraft enabled=yes
+    tags:
+      - install_minecraft
+
+  - name: create a cron entry for backup
+    cron: name='Minecraft Periodic Backup'
+          job='/etc/init.d/minecraft backup'
+          user=minecraft
+          minute='0,30'
+    tags:
+      - install_minecraft
 

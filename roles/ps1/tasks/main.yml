@@ -1,20 +1,15 @@
 ---
+  - fail: msg='Please run with "-e emoji=SOMETHING", replacing the loaf with an emoji of your choosing.'
+    when: emoji is not defined or not emoji
 
-- name: configure PS1
-  hosts: all
-  remote_user: root
-  tasks:
-    - fail: msg='Please run with "-e emoji=SOMETHING", replacing the loaf with an emoji of your choosing.'
-      when: emoji is not defined or not emoji
+  - name: install git
+    apt: name=git state=present
 
-    - name: install git
-      apt: name=git state=present
+  - name: install bash-completion
+    apt: name=bash-completion state=present
 
-    - name: install bash-completion
-      apt: name=bash-completion state=present
+  - name: upload .ps1
+    template: src=ps1.j2 dest=~/.ps1
 
-    - name: upload .ps1
-      template: src=ps1.j2 dest=~/.ps1
-
-    - name: replace all PS1 entries in .bashrc with `cat ~/.ps1`
-      replace: dest=~/.bashrc regexp='^(.*)PS1=.*' replace='PS1=`cat ~/.ps1`'
+  - name: replace all PS1 entries in .bashrc with `cat ~/.ps1`
+    replace: dest=~/.bashrc regexp='^(.*)PS1=.*' replace='PS1=`cat ~/.ps1`'

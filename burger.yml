@@ -1,0 +1,8 @@
+---
+
+- name:  Provision Burger
+  hosts: burger
+  roles:
+     - { role: ssh }
+     - { role: ps1 }
+     - { role: minecraft }
