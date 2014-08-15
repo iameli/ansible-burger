@@ -1,7 +1,4 @@
 ---
-  - fail: msg='Please run with "-e emoji=SOMETHING", replacing the loaf with an emoji of your choosing.'
-    when: emoji is not defined or not emoji
-
   - name: install git
     apt: name=git state=present
 
