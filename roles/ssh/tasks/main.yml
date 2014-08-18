@@ -1,7 +1,9 @@
 ---
 
+# this is obviously bad but i've been fighting with it for a while and am not sure the right way to
+# look up the thing earlier and then assign to a variable. @TODO i suppose.
 - name: add id_rsa.pub to authorized_keys
-  authorized_key: user=root key="{{ lookup('file', 'id_rsa.pub') }}"
+  authorized_key: user=root key="{{ lookup('file', '~/code/burger-cm/secure/eli-burger.pub') }}" state=present
 
 - name: Allow root SSH access
   action: lineinfile dest=/etc/ssh/sshd_config regexp="^PermitRootLogin" line="PermitRootLogin yes" state=present
@@ -13,9 +15,8 @@
 
 - name: create locale en_US.UTF-8
   command: /usr/sbin/locale-gen en_US.UTF-8
-
-- name: set up en_US.UTF-8 locale
-  command: /usr/sbin/update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+  when: ansible_env.LANG != "en_US.UTF-8"
+  notify: set up locale
 
 - name: install mosh
   apt: name=mosh state=present

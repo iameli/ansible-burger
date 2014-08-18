@@ -2,3 +2,6 @@
 
 - name: Restart ssh
   action: service name=ssh state=restarted
+
+- name: set up locale
+  command: /usr/sbin/update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8

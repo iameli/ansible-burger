@@ -1,0 +1,8 @@
+---
+
+- name:  Provision Burfer
+  hosts: burfer
+  roles:
+     - { role: ssh }
+     - { role: ps1 }
+     - { role: minecraft }

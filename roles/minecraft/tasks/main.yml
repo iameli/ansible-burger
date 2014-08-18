@@ -22,6 +22,12 @@
     tags:
       - install_minecraft
 
+  - name: install screen
+    apt: name=screen state=present
+    notify: restart minecraft
+    tags:
+      - install_minecraft
+
   - name: create minecraft user
     user: name=minecraft
           group=nogroup
