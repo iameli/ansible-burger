@@ -1,0 +1,26 @@
+# Rando node stuff so I can throw node apps at dokku without issues
+
+- name: Package prerequisites for node.js
+  action: apt pkg=python-software-properties state=installed
+  tags: nodejs
+
+- name: add nodesource gpg key
+  apt_key: url=https://deb.nodesource.com/gpgkey/nodesource.gpg.key state=present
+
+- name: add nodesource repo
+  apt_repository: repo="deb https://deb.nodesource.com/node {{ansible_distribution_release}} main" state=present
+
+- name: add nodesource, er, source repo.
+  apt_repository: repo="deb-src https://deb.nodesource.com/node {{ansible_distribution_release}} main" state=present
+
+- name: Install nodejs and npm
+  action: apt pkg={{ item }} state=installed update-cache=yes
+  with_items:
+    - nodejs
+
+# redis too
+- name: install redis
+  action: apt pkg=redis-server state=installed
+
+- name: enable redis
+  action: service name=redis-server state=running enabled=true

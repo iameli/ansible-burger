@@ -7,3 +7,4 @@
      - { role: ps1 }
      - { role: minecraft }
      - { role: dokku }
+     - { role: node_apps}
