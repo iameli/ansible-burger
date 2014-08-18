@@ -3,14 +3,12 @@
   stat: path=/usr/local/bin/dokku
   register: dokku_exec
 
+# TODO: reimplement dokku's bootstrap.sh in ansible so this can be proper. it won't even be that
+# hard. for now we have this ugly thing.
 - name: install dokku
   shell: "wget -qO - https://raw.github.com/progrium/dokku/v0.2.0/bootstrap.sh | sudo DOKKU_TAG=v0.2.0 bash"
   async: 1200
   when: not dokku_exec.stat.exists
-
-- name: add dokku vhost
-  shell: echo {{domain}} > /home/dokku/VHOST
-  sudo: true
 
 - name: add VHOST file
   template: src=VHOST.j2
