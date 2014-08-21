@@ -87,7 +87,7 @@
         group=nogroup
 
   - name: download minecraft jar file
-    get_url: url=https://s3.amazonaws.com/Minecraft.Download/versions/14w33c/minecraft_server.14w33c.jar
+    get_url: url=https://minecraft-latest.iame.li/snapshot
              force=yes
              dest=~minecraft/minecraft_server.jar
              owner=minecraft
