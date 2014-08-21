@@ -16,3 +16,30 @@
             owner=dokku
             group=nogroup
             mode=0644
+
+- name: create tls directory
+  file: path=~dokku/tls
+      state=directory
+      owner=dokku
+
+- name: add TLS cert
+  template: src=../../../secure/wildcard.iame.li/bundle.crt
+            dest=~dokku/tls/server.crt
+            owner=dokku
+            group=nogroup
+            mode=0644
+
+- name: add TLS key
+  template: src=../../../secure/wildcard.iame.li/secret.pem
+            dest=~dokku/tls/server.key
+            owner=dokku
+            group=nogroup
+            mode=0644
+
+- name: enable cert in nginx
+  action: lineinfile dest=/etc/nginx/conf.d/dokku.conf regexp="ssl_certificate " line="ssl_certificate /home/dokku/tls/server.crt;" state=present
+  notify: restart nginx
+
+- name: enable key in nginx
+  action: lineinfile dest=/etc/nginx/conf.d/dokku.conf regexp="ssl_certificate_key " line="ssl_certificate_key /home/dokku/tls/server.key;" state=present
+  notify: restart nginx
