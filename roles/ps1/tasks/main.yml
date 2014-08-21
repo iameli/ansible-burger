@@ -7,6 +7,8 @@
 
   - name: upload .ps1
     template: src=ps1.j2 dest=~/.ps1
+    register: ps1_file
 
   - name: replace all PS1 entries in .bashrc with `cat ~/.ps1`
     replace: dest=~/.bashrc regexp='^(.*)PS1=.*' replace='PS1=`cat ~/.ps1`'
+    when: ps1_file.changed
