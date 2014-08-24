@@ -43,3 +43,15 @@
 - name: enable key in nginx
   action: lineinfile dest=/etc/nginx/conf.d/dokku.conf regexp="ssl_certificate_key " line="ssl_certificate_key /home/dokku/tls/server.key;" state=present
   notify: restart nginx
+
+- name: checkout dokku-link plugin
+  git: repo=https://github.com/rlaneve/dokku-link.git
+       dest=/var/lib/dokku/plugins/link
+       version=94a741c6b4fda67e5b38adcd8f6d277b9a596dd2
+  notify: install dokku plugins
+
+- name: checkout dokku-redis plugin
+  git: repo=https://github.com/luxifer/dokku-redis-plugin
+       dest=/var/lib/dokku/plugins/redis
+       version=e0611d2f0cff19034e045841595050c470370346
+  notify: install dokku plugins
